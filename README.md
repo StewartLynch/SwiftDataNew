@@ -1,6 +1,6 @@
 # New in SwiftData OS27
 
-![AppIcon128](Images/AppIcon128.png) This is the **Completed Source code for Part 2** for the video on covering what is new in SwiftData in OS27.
+![AppIcon128](Images/AppIcon128.png) This is the **Completed Source code for Part 3** for the video on covering what is new in SwiftData in OS27.
 
 
 
