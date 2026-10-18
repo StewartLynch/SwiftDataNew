@@ -21,20 +21,16 @@ import SwiftData
 final class Visit {
     var shopName: String
     var drink: String
-    var typeRaw: String
+    var type: DrinkType
     var rating: Int
     var notes: String
     var date: Date
 
-    var type: DrinkType {
-        get { DrinkType(rawValue: typeRaw) ?? .other }
-        set { typeRaw = newValue.rawValue }
-    }
 
     init(shopName: String, drink: String, type: DrinkType, rating: Int, notes: String = "", date: Date = .now) {
         self.shopName = shopName
         self.drink = drink
-        self.typeRaw = type.rawValue
+        self.type = type
         self.rating = rating
         self.notes = notes
         self.date = date

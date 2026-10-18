@@ -19,31 +19,57 @@ import SwiftData
 
 struct VisitList: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var visits: [Visit]
+    @Query(sectionBy: \Visit.shopName) private var visits: SectionedResults<Visit,String>
     @State private var editing: Visit?
 
-    init(searchText: String) {
-        let predicate = #Predicate<Visit> { visit in
-            searchText.isEmpty || visit.shopName.localizedStandardContains(searchText)
+    init(searchText: String, allowedTypes: [DrinkType], minRating: Int) {
+        var predicates: [Predicate<Visit>] = []
+        if !searchText.isEmpty {
+            predicates.append(#Predicate<Visit> {
+                $0.shopName.localizedStandardContains(searchText) ||
+                $0.drink.localizedStandardContains(searchText)
+            })
         }
-        _visits = Query(filter: predicate, sort: \.date, order: .reverse)
+        if allowedTypes.count < DrinkType.allCases.count {
+            predicates.append(#Predicate<Visit> {
+                allowedTypes.contains($0.type)
+            })
+        }
+        if minRating > 0 {
+            predicates.append(#Predicate<Visit> {
+                $0.rating >= minRating
+            })
+        }
+        _visits = Query(
+            filter: Predicate<Visit>(all: predicates),
+            sort: [SortDescriptor(\.shopName), SortDescriptor(\.date, order: .reverse)],
+            sectionBy: \.shopName
+        )
     }
 
     var body: some View {
         List {
             Section {
-                StatsHeader(visits: visits)
+                StatsHeader(visits: visits.flatMap({Array($0)}))
             }
-            Section {
-                ForEach(visits) { visit in
-                    Button { editing = visit } label: {
-                        VisitRow(visit: visit)
-                            .contentShape(Rectangle())
+            ForEach(_visits.sections) { section in
+                Section {
+                    ForEach(section) { visit in
+                        Button {
+                                editing = visit
+                        }label: {
+                            VisitRow(visit: visit)
+                                .contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
+                    .onDelete { delete(from: section, at: $0)}
+                } header: {
+                    Text(section.title)
+                        .font(.title).bold()
                 }
-                .onDelete(perform: delete)
             }
+           
         }
         .overlay {
             if visits.isEmpty {
@@ -53,15 +79,15 @@ struct VisitList: View {
         .sheet(item: $editing) { VisitForm(visit: $0) }
     }
 
-    private func delete(at offsets: IndexSet) {
+    private func delete(from section: ResultsSection<Visit,String>, at offsets: IndexSet) {
         for index in offsets {
-            modelContext.delete(visits[index])
+            modelContext.delete(section[index])
         }
     }
 }
 
 #Preview(traits: .sampleData) {
     NavigationStack {
-        VisitList(searchText: "")
+        VisitList(searchText: "", allowedTypes: DrinkType.allCases, minRating: 0)
     }
 }

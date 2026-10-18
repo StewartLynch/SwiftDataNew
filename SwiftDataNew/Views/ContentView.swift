@@ -20,17 +20,39 @@ import SwiftData
 struct ContentView: View {
     @State private var searchText = ""
     @State private var showingAdd = false
+    @State private var allowedTypes = DrinkType.allCases
+    @State private var minRating = 0
 
     var body: some View {
         NavigationStack {
-            VisitList(searchText: searchText)
+            VisitList(searchText: searchText, allowedTypes: allowedTypes, minRating: minRating)
                 .navigationTitle("CafeLog")
                 .searchable(text: $searchText, prompt: "Shop name")
                 .toolbar {
+                    Menu("Filter", systemImage: "line.3.horizontal.decrease") {
+                        ForEach(DrinkType.allCases) { type in
+                            Toggle(type.title, isOn: binding(for: type))
+                        }
+                        Stepper("Minimum rating: \(minRating)", value: $minRating, in: 0...5)
+                    }
+                    .menuActionDismissBehavior(.disabled)
                     Button("Add", systemImage: "plus") { showingAdd = true }
                 }
                 .sheet(isPresented: $showingAdd) { VisitForm(visit: nil) }
         }
+    }
+    
+    private func binding(for type: DrinkType) -> Binding<Bool> {
+        Binding {
+            allowedTypes.contains(type)
+        } set: { isOn in
+            if isOn {
+                allowedTypes.append(type)
+            } else {
+                allowedTypes.removeAll(where: {$0 == type })
+            }
+        }
+
     }
 }
 
