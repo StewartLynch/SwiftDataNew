@@ -20,15 +20,18 @@ import SwiftData
 @main
 struct SwiftDataNewApp: App {
     let container: ModelContainer
+    @State private var stats: StatsStore
 
     init() {
         container = try! ModelContainer(for: Visit.self)
         SampleData.insertIfEmpty(into: container.mainContext)
+        _stats = State(initialValue: try! StatsStore(modelContext: container.mainContext))
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(stats)
         }
         .modelContainer(container)
     }

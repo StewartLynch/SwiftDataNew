@@ -15,6 +15,7 @@
 
 
 import Foundation
+import MapKit
 import SwiftData
 
 @Model
@@ -25,14 +26,24 @@ final class Visit {
     var rating: Int
     var notes: String
     var date: Date
+    @Attribute(.codable) var mapItemIdentifier: MKMapItem.Identifier?
 
 
-    init(shopName: String, drink: String, type: DrinkType, rating: Int, notes: String = "", date: Date = .now) {
+    init(
+        shopName: String,
+        drink: String,
+        type: DrinkType,
+        rating: Int,
+        notes: String = "",
+        date: Date = .now,
+        mapItemIdentifier: MKMapItem.Identifier? = nil
+    ) {
         self.shopName = shopName
         self.drink = drink
         self.type = type
         self.rating = rating
         self.notes = notes
         self.date = date
+        self.mapItemIdentifier = mapItemIdentifier
     }
 }

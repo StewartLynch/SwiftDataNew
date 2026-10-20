@@ -50,7 +50,7 @@ struct VisitList: View {
     var body: some View {
         List {
             Section {
-                StatsHeader(visits: visits.flatMap({Array($0)}))
+                StatsHeader()
             }
             ForEach(_visits.sections) { section in
                 Section {

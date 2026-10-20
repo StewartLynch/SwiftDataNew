@@ -13,7 +13,7 @@
 //----------------------------------------------
 // Copyright © 2026 CreaTECH Solutions (Stewart Lynch). All rights reserved.
 
-
+import MapKit
 import SwiftUI
 import SwiftData
 
@@ -29,7 +29,9 @@ struct VisitForm: View {
     @State private var rating = 3
     @State private var notes = ""
     @State private var date = Date.now
-
+    @State private var mapItemIdentifier: MKMapItem.Identifier?
+    @State private var showingSearch = false
+    
     var body: some View {
         NavigationStack {
             Form {
@@ -41,6 +43,18 @@ struct VisitForm: View {
                 Stepper("Rating: \(rating)", value: $rating, in: 1...5)
                 DatePicker("Date", selection: $date, displayedComponents: .date)
                 TextField("Notes", text: $notes, axis: .vertical)
+                Section("Cafe") {
+                    Button("Find Cafe", systemImage: "magnifyingglass") {
+                        showingSearch = true
+                    }
+                    if let mapItemIdentifier {
+                        Button("Open in Maps", systemImage: "map") {
+                            Task {
+                                await openInMaps(mapItemIdentifier)
+                            }
+                        }
+                    }
+                }
             }
             .navigationTitle(visit == nil ? "New Visit" : "Edit Visit")
             .navigationBarTitleDisplayMode(.inline)
@@ -54,6 +68,14 @@ struct VisitForm: View {
                 }
             }
             .onAppear(perform: load)
+            .sheet(isPresented: $showingSearch) {
+                CafeSearch { item in
+                    if shopName.isEmpty {
+                        shopName = item.name ?? ""
+                    }
+                    mapItemIdentifier = item.identifier
+                }
+            }
         }
     }
 
@@ -65,6 +87,7 @@ struct VisitForm: View {
         rating = visit.rating
         notes = visit.notes
         date = visit.date
+        mapItemIdentifier = visit.mapItemIdentifier
     }
 
     private func save() {
@@ -75,11 +98,29 @@ struct VisitForm: View {
             visit.rating = rating
             visit.notes = notes
             visit.date = date
+            visit.mapItemIdentifier = mapItemIdentifier
         } else {
-            modelContext.insert(Visit(shopName: shopName, drink: drink, type: type,
-                                      rating: rating, notes: notes, date: date))
+            modelContext.insert(
+                Visit(
+                    shopName: shopName,
+                    drink: drink,
+                    type: type,
+                    rating: rating,
+                    notes: notes,
+                    date: date,
+                    mapItemIdentifier: mapItemIdentifier
+                )
+            )
         }
         dismiss()
+    }
+    
+    private func openInMaps( _ identifier: MKMapItem.Identifier) async {
+        let request = MKMapItemRequest(mapItemIdentifier: identifier)
+        if let item = try? await request.mapItem {
+            item.openInMaps()
+        }
+        
     }
 }
 
