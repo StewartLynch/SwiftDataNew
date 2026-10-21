@@ -28,7 +28,9 @@ struct SampleDataModifier: PreviewModifier {
     }
 
     func body(content: Content, context: ModelContainer) -> some View {
-        content.modelContainer(context)
+        content
+            .modelContainer(context)
+            .environment(try! StatsStore(modelContext: context.mainContext))
     }
 }
 

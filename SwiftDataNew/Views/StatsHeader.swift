@@ -18,25 +18,16 @@ import SwiftUI
 import SwiftData
 
 struct StatsHeader: View {
-    let visits: [Visit]
-
-    private var averageRating: Double {
-        guard !visits.isEmpty else { return 0 }
-        return Double(visits.map(\.rating).reduce(0, +)) / Double(visits.count)
-    }
-
-    private var topShop: String {
-        Dictionary(grouping: visits, by: \.shopName)
-            .max { $0.value.count < $1.value.count }?.key ?? "None"
-    }
+    @Environment(StatsStore.self) private var stats
+   
 
     var body: some View {
         HStack {
-            stat("Visits", "\(visits.count)")
+            stat("Visits", "\(stats.totalVisits)")
             Divider()
-            stat("Average", averageRating.formatted(.number.precision(.fractionLength(1))))
+            stat("Average", stats.averageRating.formatted(.number.precision(.fractionLength(1))))
             Divider()
-            stat("Top shop", topShop)
+            stat("Top shop", stats.topShop)
         }
         .frame(height: 56)
         .padding(.horizontal)
@@ -52,5 +43,5 @@ struct StatsHeader: View {
 }
 
 #Preview {
-    StatsHeader(visits: SampleData.makeVisits())
+    StatsHeader()
 }
