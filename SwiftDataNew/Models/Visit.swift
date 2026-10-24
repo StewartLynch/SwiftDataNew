@@ -20,6 +20,7 @@ import SwiftData
 
 @Model
 final class Visit {
+    @Attribute(.preserveValueOnDeletion) var uuid = UUID()
     var shopName: String
     var drink: String
     var type: DrinkType

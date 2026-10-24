@@ -20,6 +20,7 @@ import SwiftData
 struct ContentView: View {
     @State private var searchText = ""
     @State private var showingAdd = false
+    @State private var showingLog = false
     @State private var allowedTypes = DrinkType.allCases
     @State private var minRating = 0
 
@@ -36,9 +37,13 @@ struct ContentView: View {
                         Stepper("Minimum rating: \(minRating)", value: $minRating, in: 0...5)
                     }
                     .menuActionDismissBehavior(.disabled)
+                    Button("Sync log", systemImage: "arrow.triangle.2.circlepath") { showingLog = true}
                     Button("Add", systemImage: "plus") { showingAdd = true }
                 }
                 .sheet(isPresented: $showingAdd) { VisitForm(visit: nil) }
+                .sheet(isPresented: $showingLog) {
+                    SyncLogView()
+                }
         }
     }
     

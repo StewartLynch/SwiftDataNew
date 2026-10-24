@@ -31,6 +31,7 @@ struct SampleDataModifier: PreviewModifier {
         content
             .modelContainer(context)
             .environment(try! StatsStore(modelContext: context.mainContext))
+            .environment(try! SyncEngine(container: context))
     }
 }
 
